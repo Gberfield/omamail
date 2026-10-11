@@ -61,7 +61,7 @@ impl Read for Input {
                 Storage::FileSystem::{FILE_TYPE_PIPE, GetFileType, ReadFile},
                 System::Pipes::PeekNamedPipe,
             };
-            let input = io::stdin();
+            let mut input = io::stdin();
             let handle = input.as_raw_handle();
             if unsafe { GetFileType(handle) } != FILE_TYPE_PIPE {
                 return input.read(bytes);
