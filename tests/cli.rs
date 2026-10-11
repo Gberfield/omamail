@@ -450,7 +450,11 @@ async fn malformed_final_imap_action_id_prevents_all_network_and_cache_changes()
         let mut mutations = 0;
         loop {
             let mut line = String::new();
-            if reader.read_line(&mut line).await.unwrap() == 0 {
+            if match reader.read_line(&mut line).await {
+                            Ok(n) => n == 0,
+                            Err(error) if error.kind() == std::io::ErrorKind::ConnectionReset => true,
+                            Err(error) => panic!("synthetic IMAP read failed: {error}"),
+                        } {
                 break;
             }
             let response = if line.starts_with("O1 LOGIN ") {
@@ -1033,7 +1037,7 @@ fn send_previews_repeatable_inputs_and_strict_bounded_utf8_without_writes() {
         serde_json::json!({"ok":true,"result":{
             "dryRun":true,"executed":false,"accountId":"imap:imap@example.org","from":"imap@example.org",
             "to":["one@example.org","two@example.org"],"cc":["three@example.org"],"bcc":["four@example.org"],
-            "subject":"Unicode 工","body":body,"attachments":[{"name":"quoted\\工\".txt","size":18},{"name":"second.txt","size":3}]
+            "subject":"Unicode 工","body":body,"attachments":[{"name":attachment.file_name().unwrap().to_str().unwrap(),"size":18},{"name":"second.txt","size":3}]
         }})
     );
     for body in [
@@ -1506,7 +1510,11 @@ async fn imap_action_preview_requires_discovered_destinations_and_execution_uses
                     let mut moves = 0;
                     loop {
                         let mut line = String::new();
-                        if reader.read_line(&mut line).await.unwrap() == 0 {
+                        if match reader.read_line(&mut line).await {
+                            Ok(n) => n == 0,
+                            Err(error) if error.kind() == std::io::ErrorKind::ConnectionReset => true,
+                            Err(error) => panic!("synthetic IMAP read failed: {error}"),
+                        } {
                             break;
                         }
                         let response = if line.starts_with("O1 LOGIN ") {
@@ -1624,7 +1632,11 @@ async fn imap_archive_keeps_confirmed_folder_results_when_later_select_refuses()
         let mut commands = Vec::new();
         loop {
             let mut line = String::new();
-            if reader.read_line(&mut line).await.unwrap() == 0 {
+            if match reader.read_line(&mut line).await {
+                            Ok(n) => n == 0,
+                            Err(error) if error.kind() == std::io::ErrorKind::ConnectionReset => true,
+                            Err(error) => panic!("synthetic IMAP read failed: {error}"),
+                        } {
                 break;
             }
             let response = if line.starts_with("O1 LOGIN ") {
