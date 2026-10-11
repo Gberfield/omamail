@@ -146,6 +146,13 @@ fn mail_list_fixture(imap_port: u16, keyring_succeeds: bool) -> MailListFixture 
     ));
     let config = config_root(&root).join("omamail");
     fs::create_dir_all(&config).unwrap();
+    #[cfg(windows)]
+    {
+        // These synthetic ancestors are created by std::fs, so unlike the
+        // native private-directory creator they inherit the temp directory ACL.
+        set_mode(&root, 0o700);
+        set_mode(&config_root(&root), 0o700);
+    }
     fs::write(
         config.join("accounts.json"),
         serde_json::json!({
