@@ -304,8 +304,13 @@ fn set_mode(path: &Path, _: u32) {
     // Native private storage requires a protected DACL and this user's owner
     // SID. A no-op Unix-mode stub does not make an inherited Windows file private.
     let user = std::env::var("USERNAME").unwrap();
+    let grant = if path.is_dir() {
+        format!("{user}:(OI)(CI)F")
+    } else {
+        format!("{user}:F")
+    };
     for arguments in [vec!["/setowner".to_owned(), user.clone()],
-        vec!["/inheritance:r".to_owned(), "/grant:r".to_owned(), format!("{user}:F")]] {
+        vec!["/inheritance:r".to_owned(), "/grant:r".to_owned(), grant]] {
         let output = Command::new("icacls").arg(path).args(arguments).output().unwrap();
         assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
     }
