@@ -56,8 +56,10 @@ fn no_arguments_print_help_without_starting_a_gui() {
 
 #[test]
 fn serve_runs_the_persistent_backend() {
+    let fixture = mail_list_fixture(9, false);
     let mut child = Command::new(env!("CARGO_BIN_EXE_omamail"))
         .arg("serve")
+        .env("OMAMAIL_INTEGRATION_HOME", &fixture.0)
         .env_remove("HOME")
         .env_remove("XDG_CONFIG_HOME")
         .env_remove("XDG_CACHE_HOME")
@@ -74,7 +76,7 @@ fn serve_runs_the_persistent_backend() {
         .unwrap();
     drop(child.stdin.take());
     let output = child.wait_with_output().unwrap();
-    assert!(output.status.success());
+    assert!(output.status.success(), "{output:?}");
     assert!(output.stderr.is_empty());
     let replies: Vec<Value> = output
         .stdout
@@ -112,6 +114,7 @@ fn call_in_empty_home(method: &str, params: &[u8]) -> Output {
     std::fs::create_dir_all(&home).unwrap();
     let mut child = Command::new(env!("CARGO_BIN_EXE_omamail"))
         .args(["call", method, "--json"])
+        .env("OMAMAIL_INTEGRATION_HOME", &home)
         .env("XDG_CONFIG_HOME", &home)
         .env("HOME", &home)
         .stdin(Stdio::piped())
@@ -220,6 +223,7 @@ fn assert_no_runtime_storage(root: &Path) {
 fn call_mail_list(root: &Path, account: &str) -> Output {
     let mut child = Command::new(env!("CARGO_BIN_EXE_omamail"))
         .args(["call", "mail.list", "--json"])
+        .env("OMAMAIL_INTEGRATION_HOME", root)
         .env("XDG_CONFIG_HOME", root.join("config"))
         .env("HOME", root.join("home"))
         .env("PATH", root.join("bin"))
@@ -253,6 +257,7 @@ fn call_mail_list(root: &Path, account: &str) -> Output {
 fn call_mail_read(root: &Path, account: &str, id: &str) -> Output {
     let mut child = Command::new(env!("CARGO_BIN_EXE_omamail"))
         .args(["call", "mail.read", "--json"])
+        .env("OMAMAIL_INTEGRATION_HOME", root)
         .env("XDG_CONFIG_HOME", root.join("config"))
         .env("HOME", root.join("home"))
         .env("PATH", root.join("bin"))
@@ -288,7 +293,16 @@ fn set_mode(path: &Path, mode: u32) {
     fs::set_permissions(path, fs::Permissions::from_mode(mode)).unwrap();
 }
 #[cfg(windows)]
-fn set_mode(_: &Path, _: u32) {}
+fn set_mode(path: &Path, _: u32) {
+    // Native private storage requires a protected DACL and this user's owner
+    // SID. A no-op Unix-mode stub does not make an inherited Windows file private.
+    let user = std::env::var("USERNAME").unwrap();
+    for arguments in [vec!["/setowner".to_owned(), user.clone()],
+        vec!["/inheritance:r".to_owned(), "/grant:r".to_owned(), format!("{user}:F")]] {
+        let output = Command::new("icacls").arg(path).args(arguments).output().unwrap();
+        assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    }
+}
 
 #[cfg(unix)]
 fn metadata(path: &Path) -> (u64, (i64, i64), (i64, i64)) {
@@ -301,8 +315,26 @@ fn metadata(path: &Path) -> (u64, (i64, i64), (i64, i64)) {
 }
 #[cfg(windows)]
 fn metadata(path: &Path) -> (u64, (i64, i64), (i64, i64)) {
+    use std::hash::{Hash, Hasher};
+    use std::os::windows::{ffi::OsStrExt, fs::MetadataExt};
+    use windows_sys::Win32::Security::{GetFileSecurityW, DACL_SECURITY_INFORMATION, OWNER_SECURITY_INFORMATION};
     let metadata = fs::metadata(path).unwrap();
-    (metadata.len(), (0, 0), (0, 0))
+    let name: Vec<u16> = path.as_os_str().encode_wide().chain(Some(0)).collect();
+    let flags = DACL_SECURITY_INFORMATION | OWNER_SECURITY_INFORMATION;
+    let mut needed = 0;
+    unsafe { GetFileSecurityW(name.as_ptr(), flags, std::ptr::null_mut(), 0, &mut needed) };
+    assert!(needed > 0);
+    let mut descriptor = vec![0u8; needed as usize];
+    assert_ne!(unsafe { GetFileSecurityW(name.as_ptr(), flags, descriptor.as_mut_ptr().cast(), needed, &mut needed) }, 0);
+    descriptor.truncate(needed as usize);
+    let mut hash = std::collections::hash_map::DefaultHasher::new();
+    descriptor.hash(&mut hash);
+    // Capture bytes separately in fixture_snapshot, and here preserve native
+    // timestamps, attributes, owner and DACL: a same-size write or permission
+    // repair must not pass a read-only regression merely because length stayed put.
+    (metadata.len(),
+        (metadata.last_write_time() as i64, metadata.creation_time() as i64),
+        (metadata.file_attributes() as i64, hash.finish() as i64))
 }
 
 type FixtureSnapshot = Vec<(
@@ -779,6 +811,7 @@ fn pretty_call_errors_go_to_stderr() {
 fn root_mail(root: &Path, args: &[&str], body: &[u8]) -> Output {
     let mut child = Command::new(env!("CARGO_BIN_EXE_omamail"))
         .args(args)
+        .env("OMAMAIL_INTEGRATION_HOME", root)
         .env("XDG_CONFIG_HOME", root.join("config"))
         .env("XDG_CACHE_HOME", root.join("cache"))
         .env("XDG_STATE_HOME", root.join("state"))
@@ -952,7 +985,11 @@ fn root_mail_errors_use_stable_envelopes_and_never_fall_back_accounts() {
 #[test]
 fn send_previews_repeatable_inputs_and_strict_bounded_utf8_without_writes() {
     let fixture = mail_list_fixture(9, false);
-    let attachment = fixture.0.join("quoted\\工\".txt");
+    let attachment = fixture.0.join(if cfg!(windows) {
+        "attachment-工.txt"
+    } else {
+        "quoted\\工\".txt"
+    });
     fs::write(&attachment, b"private attachment").unwrap();
     let second = fixture.0.join("second.txt");
     fs::write(&second, b"two").unwrap();
@@ -1072,6 +1109,7 @@ fn only_send_consumes_stdin_and_human_previews_escape_untrusted_text() {
     ] {
         let mut child = Command::new(env!("CARGO_BIN_EXE_omamail"))
             .args(args)
+            .env("OMAMAIL_INTEGRATION_HOME", &fixture.0)
             .env("XDG_CONFIG_HOME", fixture.0.join("config"))
             .env("HOME", fixture.0.join("home"))
             .env("PATH", fixture.0.join("bin"))
@@ -1181,6 +1219,7 @@ async fn real_smtp_send(generic: bool, acknowledge: bool, owner: bool, crash: bo
     let mut desktop = if owner {
         let mut child = tokio::process::Command::new(env!("CARGO_BIN_EXE_omamail"))
             .arg("serve")
+            .env("OMAMAIL_INTEGRATION_HOME", &fixture.0)
             .env("XDG_CONFIG_HOME", fixture.0.join("config"))
             .env("XDG_STATE_HOME", fixture.0.join("state"))
             .env("XDG_CACHE_HOME", fixture.0.join("cache"))
