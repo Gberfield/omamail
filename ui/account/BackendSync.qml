@@ -108,7 +108,14 @@ Item {
   function check() {
     reconcile()
     if (!registeredBackend || !registeredBackend.ready || !registered) return
-    registeredBackend.call("mail.check", { accountId: registeredAccount }, function() {})
+    var mine = epoch
+    registeredBackend.call("mail.check", { accountId: registeredAccount }, function(result, error) {
+      if (!root || mine !== root.epoch || !error || error.message !== "mail_watch_unknown") return
+      // The backend no longer holds this watch, so polling stopped: register again.
+      root.registrationKey = ""
+      root.registered = false
+      root.scheduleReconcile()
+    })
   }
 
   onEnabledChanged: scheduleReconcile()

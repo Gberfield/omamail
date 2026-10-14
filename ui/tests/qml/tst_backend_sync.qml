@@ -10,6 +10,9 @@ Item {
     property var pendingStop: null
     property bool failWatch: false
     property bool deferWatch: false
+    property string checkError: ""
+    property bool deferCheck: false
+    property var pendingChecks: []
     property var pendingWatches: []
     signal notification(string method, var params)
     function call(method, params, callback) {
@@ -17,6 +20,8 @@ Item {
       if (!ready) { callback(null, {message:"Backend unavailable"}); return }
       if (method === "mail.unwatch") pendingStop = callback
       else if (method === "mail.watch" && deferWatch) pendingWatches = pendingWatches.concat([callback])
+      else if (method === "mail.check" && deferCheck) pendingChecks = pendingChecks.concat([callback])
+      else if (method === "mail.check" && checkError) callback(null, {message:checkError})
       else callback(null, method === "mail.watch" && failWatch ? {message:"temporary"} : null)
     }
   }
@@ -49,6 +54,9 @@ Item {
       backend.calls = []
       backend.failWatch = false
       backend.deferWatch = false
+      backend.checkError = ""
+      backend.deferCheck = false
+      backend.pendingChecks = []
       sync.accountId = "a@example.org"
       sync.intervalSec = 120
       sync.pageSize = 25
@@ -263,6 +271,47 @@ Item {
       sync.check()
       compare(backend.calls.length, count + 1)
       compare(backend.calls[count].method, "mail.watch")
+    }
+    function test_check_for_a_lost_watch_registers_again() {
+      sync.enabled = true
+      sync.reconcile()
+      wait(10)
+      backend.checkError = "mail_watch_unknown"
+      sync.check()
+      var count = backend.calls.length
+      compare(backend.calls[count - 1].method, "mail.check")
+      verify(!sync.registered)
+      tryVerify(function() { return backend.calls.length === count + 1 }, 1000)
+      compare(backend.calls[count].method, "mail.watch")
+      verify(sync.registered)
+    }
+    function test_other_check_errors_keep_the_watch() {
+      sync.enabled = true
+      sync.reconcile()
+      wait(10)
+      backend.checkError = "mail_network_failed"
+      sync.check()
+      var count = backend.calls.length
+      wait(10)
+      compare(backend.calls.length, count)
+      verify(sync.registered)
+    }
+    function test_lost_watch_reply_for_a_replaced_watch_is_ignored() {
+      sync.enabled = true
+      sync.reconcile()
+      wait(10)
+      backend.deferCheck = true
+      sync.check()
+      compare(backend.pendingChecks.length, 1)
+      sync.intervalSec = 60
+      sync.reconcile()
+      var count = backend.calls.length
+      compare(backend.calls[count - 1].method, "mail.watch")
+      verify(sync.registered)
+      backend.pendingChecks[0](null, {message:"mail_watch_unknown"})
+      wait(10)
+      compare(backend.calls.length, count)
+      verify(sync.registered)
     }
   }
 }
