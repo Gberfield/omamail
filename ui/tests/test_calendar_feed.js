@@ -168,7 +168,7 @@ const springDay = feed.weekDays(new Date(2026, 2, 8, 12).getTime(), 0)[0]
 const springHalfThree = new Date(2026, 2, 8, 3, 30).getTime()
 assert.strictEqual(feed.nowOffset(springDay, 0, 24, 60, springHalfThree), 210,
   "spring-forward now follows the wall-clock hour")
-assert.strictEqual(feed.timeLabel(springHalfThree), "03:30",
+assert.strictEqual(feed.timeLabel(springHalfThree), "3:30 AM",
   "the tested marker position and its label use the same local time")
 const springEvent = {
   start: { ms: springHalfThree, allDay: false },

@@ -12,7 +12,7 @@ Item {
     accentColor: Qt.rgba(1, 0.5, 0, 1)
     dimColor: Qt.rgba(0.6, 0.6, 0.6, 1)
     panelFontFamily: "monospace"
-    summary: ({id:"one",subject:"Title",from:{display:"Sender"},snippet:"Description",time:"09:14",unread:true,starred:false})
+    summary: ({id:"one",subject:"Title",from:{display:"Sender"},snippet:"Description",time:"12:14 PM",unread:true,starred:false})
   }
   TestCase {
     name: "MessageRowLayout"
@@ -56,7 +56,7 @@ Item {
       row.conversations=data.conversation
       row.checked=!!data.checked
       row.summary={id:"one",subject:data.rtl?"Re: مرحبا بالعالم":"Title",subjectDirection:data.rtl?"rtl":"ltr",
-        from:{display:data.rtl?"محمد":"Sender with a longer display name"},snippet:"Description",time:"09:14",unread:true,starred:false,
+        from:{display:data.rtl?"محمد":"Sender with a longer display name"},snippet:"Description",time:"12:14 PM",unread:true,starred:false,
         sourceLabel:data.source,thread:data.conversation?{id:"thread",memberIds:["one","two"],count:2,total:2}:null}
       waitForRendering(row)
       var sender=findChild(row,"message-sender")

@@ -898,8 +898,8 @@ function fromAttachment(part, data) {
 
 function clockOf(ms, utc) {
   var at = new Date(ms)
-  return twoDigits(utc ? at.getUTCHours() : at.getHours()) + ":"
-    + twoDigits(utc ? at.getUTCMinutes() : at.getMinutes())
+  return Mail.clockTime(utc ? at.getUTCHours() : at.getHours(),
+    utc ? at.getUTCMinutes() : at.getMinutes())
 }
 
 function dayOf(ms, utc) {

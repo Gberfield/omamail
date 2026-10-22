@@ -305,7 +305,7 @@ Item {
         location: "Luigi's", description: "Table for four" })
       compare(composer.opened, true)
       compare(composer.titleText(), "Dinner with Bob")
-      compare(composer.whenText(), "2026-09-12 19:00 21:00")
+      compare(composer.whenText(), "2026-09-12 7:00 PM 9:00 PM")
       compare(composer.locationText(), "Luigi's")
       compare(composer.notesText(), "Table for four")
       compare(eventController.createCalls, 0, "nothing is written until the owner says so")

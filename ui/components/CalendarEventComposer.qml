@@ -217,8 +217,7 @@ Rectangle {
   }
 
   function localTime(date) {
-    var hour = date.getHours(), minute = date.getMinutes()
-    return (hour < 10 ? "0" : "") + hour + ":" + (minute < 10 ? "0" : "") + minute
+    return Calendar.timeLabel(date.getTime())
   }
 
   function beginAt(startMs) {

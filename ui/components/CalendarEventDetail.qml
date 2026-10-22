@@ -89,10 +89,10 @@ Rectangle {
     }
     var startDay = Qt.formatDate(start, "dddd, d MMMM yyyy")
     if (start.toDateString() === end.toDateString())
-      return startDay + " · " + Qt.formatTime(start, "HH:mm") + "–"
-        + Qt.formatTime(end, "HH:mm")
-    return startDay + " · " + Qt.formatTime(start, "HH:mm") + " – "
-      + Qt.formatDate(end, "dddd, d MMMM yyyy") + " · " + Qt.formatTime(end, "HH:mm")
+      return startDay + " · " + Qt.formatTime(start, "h:mm AP") + "–"
+        + Qt.formatTime(end, "h:mm AP")
+    return startDay + " · " + Qt.formatTime(start, "h:mm AP") + " – "
+      + Qt.formatDate(end, "dddd, d MMMM yyyy") + " · " + Qt.formatTime(end, "h:mm AP")
   }
 
   CalendarPalette {

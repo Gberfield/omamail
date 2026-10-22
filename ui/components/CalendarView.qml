@@ -827,8 +827,7 @@ Item {
                     var event = monthEvent.eventData
                     if (!event) return ""
                     var time = event.start && !event.start.allDay
-                      ? Calendar.two(new Date(event.start.ms).getHours()) + ":"
-                        + Calendar.two(new Date(event.start.ms).getMinutes()) + " " : ""
+                      ? Calendar.timeLabel(event.start.ms) + " " : ""
                     var title = String(event.summary || "Untitled event")
                     return monthEvent.width < Style.space(140) ? title + (time ? " · " + time.trim() : "") : time + title
                   }
@@ -1040,7 +1039,7 @@ Item {
           }
           Text {
             width: parent.width
-            text: Qt.formatDateTime(new Date(agendaRow.modelData.start.ms), agendaRow.modelData.start.allDay ? "ddd, MMM d" : "ddd, MMM d · hh:mm")
+            text: Qt.formatDateTime(new Date(agendaRow.modelData.start.ms), agendaRow.modelData.start.allDay ? "ddd, MMM d" : "ddd, MMM d · h:mm AP")
               + (agendaRow.modelData.start.allDay ? " · All day" : "")
             textFormat: Text.PlainText
             color: root.dimColor
@@ -1170,8 +1169,8 @@ Item {
                 y: overflowTitle.y + overflowTitle.height + Style.space(2)
                 width: overflowTitle.width
                 text: overflowEvent.modelData.start.allDay ? "All day"
-                  : Qt.formatDateTime(new Date(overflowEvent.modelData.start.ms), Calendar.spansMultipleDays(overflowEvent.modelData) ? "d MMM HH:mm" : "HH:mm")
-                    + " – " + Qt.formatDateTime(new Date(overflowEvent.modelData.end.ms), Calendar.spansMultipleDays(overflowEvent.modelData) ? "d MMM HH:mm" : "HH:mm")
+                  : Qt.formatDateTime(new Date(overflowEvent.modelData.start.ms), Calendar.spansMultipleDays(overflowEvent.modelData) ? "d MMM h:mm AP" : "h:mm AP")
+                    + " – " + Qt.formatDateTime(new Date(overflowEvent.modelData.end.ms), Calendar.spansMultipleDays(overflowEvent.modelData) ? "d MMM h:mm AP" : "h:mm AP")
                 textFormat: Text.PlainText
                 color: root.dimColor
                 font.family: root.panelFontFamily

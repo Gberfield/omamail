@@ -564,7 +564,7 @@ grep -q 'root.gmail.refreshCalendarPreview()' BarWidget.qml \
   || fail "opening the bar preview must refresh its upcoming events"
 grep -q 'width: parent ? parent.width : 0' BarWidget.qml \
   || fail "bar preview rows must stay inside the panel's padded content area"
-grep -q '"MMM d · ddd HH:mm"' bar/BarPreview.qml \
+grep -q '"MMM d · ddd h:mm AP"' bar/BarPreview.qml \
   || fail "upcoming events must show a calendar date as well as a weekday"
 if awk '
   /function activateEvent\(event\)/ { in_function = 1 }

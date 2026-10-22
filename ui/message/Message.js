@@ -797,7 +797,7 @@ function relativeTime(date, now) {
   var sameDay = date.getFullYear() === reference.getFullYear()
     && date.getMonth() === reference.getMonth()
     && date.getDate() === reference.getDate()
-  if (sameDay) return pad(date.getHours()) + ":" + pad(date.getMinutes())
+  if (sameDay) return clockTime(date.getHours(), date.getMinutes())
   var days = Math.floor(elapsed / 86400000)
   if (days < 3) return WEEKDAYS[date.getDay()]
   if (days < 365)
@@ -805,10 +805,14 @@ function relativeTime(date, now) {
   return MONTHS[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear()
 }
 
+function clockTime(hour, minute) {
+  return (hour % 12 || 12) + ":" + pad(minute) + (hour < 12 ? " AM" : " PM")
+}
+
 function fullTime(date) {
   if (!date) return ""
   return MONTHS[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear()
-    + " " + pad(date.getHours()) + ":" + pad(date.getMinutes())
+    + " " + clockTime(date.getHours(), date.getMinutes())
 }
 
 // ------------------------------------------------------------- row summary

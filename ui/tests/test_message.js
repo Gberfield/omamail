@@ -277,7 +277,7 @@ assert.strictEqual(message.relativeTime(ago(5 * 60000), now), "5m")
 assert.strictEqual(message.relativeTime(ago(59 * 60000), now), "59m")
 // Past an hour a clock time is more useful than "3h", and it matches how
 // Gmail's own list reads.
-assert.ok(/^\d\d:\d\d$/.test(message.relativeTime(ago(3 * 3600 * 1000), now)))
+assert.ok(/^\d{1,2}:\d\d (AM|PM)$/.test(message.relativeTime(ago(3 * 3600 * 1000), now)))
 assert.ok(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/.test(message.relativeTime(ago(2 * 86400000), now)))
 assert.ok(/^[A-Z][a-z]{2} \d+$/.test(message.relativeTime(ago(40 * 86400000), now)))
 assert.ok(/^[A-Z][a-z]{2} \d+, \d{4}$/.test(message.relativeTime(ago(500 * 86400000), now)))

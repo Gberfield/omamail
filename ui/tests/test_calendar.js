@@ -167,7 +167,7 @@ const namedZone = calendar.invitationFrom([
 assert.strictEqual(namedZone.start.resolved, false)
 assert.strictEqual(namedZone.start.tzid, "Europe/Stockholm")
 assert.strictEqual(namedZone.start.ms, Date.UTC(2026, 7, 21, 9, 0, 0))
-assert.ok(calendar.formatWhen(namedZone).indexOf("09:00 (Europe/Stockholm)") > 0)
+assert.ok(calendar.formatWhen(namedZone).indexOf("9:00 AM (Europe/Stockholm)") > 0)
 
 // A private zone name cannot be converted. Its fallback is UTC rather than
 // the parser machine's local zone, so separate machines agree on the instant.
@@ -251,7 +251,7 @@ assert.strictEqual(calendar.formatWhen(twoDays),
 
 assert.strictEqual(calendar.formatWhen(invite),
   new Date(Date.UTC(2026, 7, 21, 14, 0, 0)).getHours() === 14
-    ? "Fri, Aug 21, 2026 · 14:00 – 15:00"
+    ? "Fri, Aug 21, 2026 · 2:00 PM – 3:00 PM"
     : calendar.formatWhen(invite),
   "the clock is the reader's own, whatever zone the invitation named")
 assert.strictEqual(calendar.formatDuration(invite), "1 hour")

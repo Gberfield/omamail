@@ -59,7 +59,7 @@ Column {
             Text {
               width: parent.width
               text: String(entry.modelData.title || "Event") + " · "
-                + Qt.formatDateTime(new Date(entry.modelData.start), "ddd HH:mm")
+                + Qt.formatDateTime(new Date(entry.modelData.start), "ddd h:mm AP")
               textFormat: Text.PlainText
               wrapMode: Text.Wrap
               color: root.textColor

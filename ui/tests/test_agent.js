@@ -207,14 +207,14 @@ assert.equal(a.pendingLimit(['one'], 'two'),'')
   // When, as the card says it.
   const sep12 = new Date(2026, 8, 12, 19, 0).getTime()
   const thisYear = new Date(2026, 8, 7).getTime()
-  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 + 3600000 }, thisYear), "Sat 12 Sep, 19:00–20:00")
-  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 }, thisYear), "Sat 12 Sep, 19:00")
+  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 + 3600000 }, thisYear), "Sat 12 Sep, 7:00 PM–8:00 PM")
+  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 }, thisYear), "Sat 12 Sep, 7:00 PM")
   // A whole day runs from midnight to the next: one day, or two.
   const sep12day = new Date(2026, 8, 12).getTime()
   assert.strictEqual(a.suggestionWhen({ startMs: sep12day, endMs: sep12day + 86400000, allDay: true }, thisYear), "Sat 12 Sep (all day)")
   assert.strictEqual(a.suggestionWhen({ startMs: sep12day, endMs: sep12day + 2 * 86400000, allDay: true }, thisYear), "Sat 12 Sep – Sun 13 Sep (all day)")
-  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 + 26 * 3600000 }, thisYear), "Sat 12 Sep, 19:00 – Sun 13 Sep, 21:00")
-  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 + 3600000 }, new Date(2027, 0, 1).getTime()), "Sat 12 Sep 2026, 19:00–20:00")
+  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 + 26 * 3600000 }, thisYear), "Sat 12 Sep, 7:00 PM – Sun 13 Sep, 9:00 PM")
+  assert.strictEqual(a.suggestionWhen({ startMs: sep12, endMs: sep12 + 3600000 }, new Date(2027, 0, 1).getTime()), "Sat 12 Sep 2026, 7:00 PM–8:00 PM")
   assert.strictEqual(a.suggestionWhen({ startMs: 0 }, thisYear), "")
 
   // The composer's fields: a whole day becomes nine to ten, and says so.
@@ -232,6 +232,6 @@ assert.equal(a.pendingLimit(['one'], 'two'),'')
   const late = a.eventPrefill({ title: "Party", startMs: sep12, endMs: sep12 + 5 * 3600000, notes: "Bring wine" })
   assert.strictEqual(new Date(late.endMs).getHours(), 23)
   assert.strictEqual(new Date(late.endMs).getMinutes(), 59)
-  assert.strictEqual(late.description, "Bring wine\n\nThe message has it ending Sun 13 Sep, 00:00.")
+  assert.strictEqual(late.description, "Bring wine\n\nThe message has it ending Sun 13 Sep, 12:00 AM.")
   assert.strictEqual(a.eventPrefill({ title: "T", startMs: sep12, endMs: sep12 + 3600000 }).accountId, "")
 }

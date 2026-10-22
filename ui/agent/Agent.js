@@ -1,4 +1,5 @@
 .pragma library
+.import "../message/Message.js" as Mail
 
 function suggestsClear(text) {
   var value = String(text || "")
@@ -364,7 +365,7 @@ function suggestionWhen(suggestion, nowMs) {
     var text = DAY_NAMES[d.getDay()] + " " + d.getDate() + " " + MONTH_NAMES[d.getMonth()]
     return d.getFullYear() !== now.getFullYear() ? text + " " + d.getFullYear() : text
   }
-  function clock(d) { return two(d.getHours()) + ":" + two(d.getMinutes()) }
+  function clock(d) { return Mail.clockTime(d.getHours(), d.getMinutes()) }
   var end = new Date(Number(s.endMs) || 0)
   if (s.allDay === true) {
     var lastDay = isFinite(end.getTime()) && end.getTime() > start.getTime() ? new Date(end.getTime() - 1) : start

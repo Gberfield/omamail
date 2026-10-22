@@ -49,7 +49,7 @@ Item {
     var notice = reminderInbox.receive(record)
     // The process budget limits desktop waiters, never the actionable inbox.
     if (waiters >= 16) return
-    var body = Qt.formatDateTime(new Date(record.start), "ddd, MMM d · hh:mm")
+    var body = Qt.formatDateTime(new Date(record.start), "ddd, MMM d · h:mm AP")
     var process = notification.createObject(root, { record: notice,
       command: ["python3", pluginDir + "/scripts/notify-mail.py", "--calendar",
         notificationForeground, notificationAccent, "--", record.title, body] })

@@ -39,12 +39,18 @@ Item {
     }
   }
 
-  readonly property real timeRailWidth: Math.max(Style.space(52), allDayLabelMetrics.advanceWidth + Style.space(12))
+  readonly property real timeRailWidth: Math.max(Style.space(52), Math.max(allDayLabelMetrics.advanceWidth, clockLabelMetrics.advanceWidth) + Style.space(12))
   TextMetrics {
     id: allDayLabelMetrics
     font.family: root.panelFontFamily
     font.pixelSize: Style.font.caption
     text: "all-day"
+  }
+  TextMetrics {
+    id: clockLabelMetrics
+    font.family: root.panelFontFamily
+    font.pixelSize: Style.font.caption
+    text: "12:00 AM"
   }
   readonly property var weekdayNames: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
   readonly property var hourRange: Calendar.weekHourRange(
@@ -248,8 +254,8 @@ Item {
             contentItem: Text {
               text: String(allDayEvent.eventData.summary || "Untitled event")
                 + (allDayEvent.eventData.start.allDay ? "" : "\n"
-                  + Qt.formatDateTime(new Date(allDayEvent.eventData.start.ms), "ddd d MMM, HH:mm")
-                  + " – " + Qt.formatDateTime(new Date(allDayEvent.eventData.end.ms), "ddd d MMM, HH:mm"))
+                  + Qt.formatDateTime(new Date(allDayEvent.eventData.start.ms), "ddd d MMM, h:mm AP")
+                  + " – " + Qt.formatDateTime(new Date(allDayEvent.eventData.end.ms), "ddd d MMM, h:mm AP"))
               textFormat: Text.PlainText
               color: root.textColor
               font.family: root.panelFontFamily
@@ -298,7 +304,7 @@ Item {
             anchors.leftMargin: Style.space(4)
             anchors.top: parent.top
             anchors.topMargin: index === 0 ? Style.space(2) : -implicitHeight / 2
-            text: Calendar.two(root.firstHour + index) + ":00"
+            text: Calendar.timeLabel(new Date(2000, 0, 1, root.firstHour + index).getTime())
             color: root.dimColor
             font.family: root.panelFontFamily
             font.pixelSize: Style.font.caption
@@ -389,7 +395,7 @@ Item {
                   y: Calendar.eventTop({start:{ms:first}}, dayColumn.modelData, root.firstHour, timeline.hourHeight),
                   width: dayColumn.width,
                   height: (last - first) / 3600000 * timeline.hourHeight,
-                  label: Qt.formatTime(new Date(first), "HH:mm") + "–" + Qt.formatTime(new Date(last), "HH:mm") }
+                  label: Qt.formatTime(new Date(first), "h:mm AP") + "–" + Qt.formatTime(new Date(last), "h:mm AP") }
               }
               onPressed: function(mouse) { initialY = mouse.y; selectTo(mouse.y) }
               onPositionChanged: function(mouse) { if (pressed) selectTo(mouse.y) }
@@ -453,8 +459,8 @@ Item {
                   Text {
                     width: parent.width
                     visible: eventBlock.height >= Style.space(38)
-                    text: Qt.formatTime(new Date(eventBlock.eventData.start.ms), "HH:mm")
-                      + (width >= timeMetrics.advanceWidth ? "–" + Qt.formatTime(new Date(eventBlock.eventData.end.ms), "HH:mm") : "")
+                    text: Qt.formatTime(new Date(eventBlock.eventData.start.ms), "h:mm AP")
+                      + (width >= timeMetrics.advanceWidth ? "–" + Qt.formatTime(new Date(eventBlock.eventData.end.ms), "h:mm AP") : "")
                     elide: Text.ElideRight
                     color: root.dimColor
                     font.family: root.panelFontFamily
@@ -464,7 +470,7 @@ Item {
                       id: timeMetrics
                       font.family: root.panelFontFamily
                       font.pixelSize: Style.font.caption
-                      text: "00:00–00:00"
+                      text: "12:00 AM–12:00 PM"
                     }
                   }
                 }
@@ -504,7 +510,7 @@ Item {
                     root.dragPreview = { x: root.timeRailWidth + (edge === "" ? column : initialColumn) * dayColumn.width,
                       y: Calendar.eventTop(previewEvent, previewDay, root.firstHour, timeline.hourHeight),
                       width: dayColumn.width, height: Calendar.eventHeight(previewEvent, previewDay, timeline.hourHeight),
-                      label: Qt.formatTime(new Date(proposed.start), "HH:mm") + "–" + Qt.formatTime(new Date(proposed.end), "HH:mm") }
+                      label: Qt.formatTime(new Date(proposed.start), "h:mm AP") + "–" + Qt.formatTime(new Date(proposed.end), "h:mm AP") }
                   }
                   onReleased: {
                     root.dragPreview = null
@@ -543,8 +549,8 @@ Item {
                   delay: 500
                   contentItem: Text {
                     text: String(eventBlock.eventData.summary || "Untitled event") + "\n"
-                      + Qt.formatTime(new Date(eventBlock.eventData.start.ms), "HH:mm") + "–"
-                      + Qt.formatTime(new Date(eventBlock.eventData.end.ms), "HH:mm")
+                      + Qt.formatTime(new Date(eventBlock.eventData.start.ms), "h:mm AP") + "–"
+                      + Qt.formatTime(new Date(eventBlock.eventData.end.ms), "h:mm AP")
                     textFormat: Text.PlainText
                     color: root.textColor
                     font.family: root.panelFontFamily

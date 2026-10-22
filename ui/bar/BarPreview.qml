@@ -163,7 +163,7 @@ Column {
         Text {
           width: parent.width
           text: new Date(eventRow.modelData.start.ms).toLocaleString(
-            Qt.locale(), "MMM d · ddd HH:mm")
+            Qt.locale(), "MMM d · ddd h:mm AP")
             + "  ·  " + eventRow.modelData.sourceLabel
           color: root.dimColor
           font.family: root.panelFontFamily
