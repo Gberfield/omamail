@@ -1,4 +1,5 @@
 import QtQuick
+import "../message/Message.js" as Mail
 import QtQuick.Controls
 import qs.Commons
 import "../account/Model.js" as Model
@@ -268,7 +269,8 @@ Item {
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
           textFormat: Text.PlainText
-          text: stop.modelData.time
+          objectName: "conversation-time"
+          text: Mail.displayTimeLabel(stop.modelData.time)
           color: root.dimColor
           font.family: root.panelFontFamily
           font.pixelSize: Style.font.caption

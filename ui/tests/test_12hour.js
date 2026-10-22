@@ -21,4 +21,13 @@ for (const invalid of ["0:30 AM", "13:00 PM", "12:60 PM", "12:00 XX"]) {
   assert.strictEqual(calendar.editorDateRange("2026-10-22", invalid,
     "2026-10-23", "1:00 PM", false).ok, false)
 }
-console.log("12-hour display and event-entry round trips: PASS")
+
+// Native/backend and cached summaries arrive with preformatted 24-hour labels.
+for (const [input, expected] of [["16:02", "4:02 PM"], ["00:05", "12:05 AM"],
+  ["12:00", "12:00 PM"], ["Oct 22, 2026 16:02", "Oct 22, 2026 4:02 PM"],
+  ["5m", "5m"], ["Wed", "Wed"], ["4:02 PM", "4:02 PM"], ["24:00", "24:00"],
+  ["16:60", "16:60"], ["16:02:30", "16:02:30"]]) {
+  assert.strictEqual(mail.displayTimeLabel(input), expected)
+}
+
+console.log("12-hour display, native labels, and event-entry round trips: PASS")

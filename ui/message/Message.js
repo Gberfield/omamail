@@ -809,6 +809,15 @@ function clockTime(hour, minute) {
   return (hour % 12 || 12) + ":" + pad(minute) + (hour < 12 ? " AM" : " PM")
 }
 
+// Native and cached summaries can carry already-formatted 24-hour labels.
+// Normalize only the displayed terminal clock, preserving dates and relative text.
+function displayTimeLabel(value) {
+  var text = String(value === undefined || value === null ? "" : value)
+  var match = text.match(/(^|\s)([01]?\d|2[0-3]):([0-5]\d)$/)
+  if (!match) return text
+  return text.substring(0, match.index) + match[1] + clockTime(Number(match[2]), Number(match[3]))
+}
+
 function fullTime(date) {
   if (!date) return ""
   return MONTHS[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear()

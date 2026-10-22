@@ -410,10 +410,11 @@ Item {
       // carries — so a right-click on the line can name any of them.
       Text {
         id: toLine
+        objectName: "message-full-time"
         width: parent.width
         textFormat: Text.PlainText
         text: root.summary
-          ? "to " + Mail.formatAddressList(root.summary.to, 3) + " · " + root.summary.fullTime
+          ? "to " + Mail.formatAddressList(root.summary.to, 3) + " · " + Mail.displayTimeLabel(root.summary.fullTime)
           : ""
         color: root.dimColor
         font.family: root.panelFontFamily
