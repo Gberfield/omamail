@@ -108,6 +108,21 @@ Item {
   TestCase {
     name: "NativeLocaleClock"
     when: windowShown
+    function test_narrow_reader_keeps_the_complete_clock_visible() {
+      reader.width = 360
+      mailService.selectedMessage = {id:"message-9",subject:"Synthetic",from:{display:"Sender",email:"sender@example.com"},
+        to:[{display:"Morgan Example",email:"morgan@example.com"},{display:"Taylor Example",email:"taylor@example.com"},
+          {display:"Jordan Example",email:"jordan@example.com"}],fullTime:"Oct 22, 2026 16:02",starred:false}
+      waitForRendering(reader)
+      var label = findChild(reader, "message-full-time")
+      verify(!label.truncated, "the date and localized day period must remain visible")
+      verify(label.lineCount > 1, "a long recipient/date line wraps at narrow widths")
+      verify(label.contentHeight <= label.height, "all wrapped lines fit")
+      compare(label.textFormat, Text.PlainText)
+      reader.width = 900
+      mailService.selectedMessage = {id:"message-9",subject:"Activity on Sprint board",from:{display:"Boards",email:"boards@example.com"},
+        to:[{display:"Reader",email:"reader@example.com"}],fullTime:"Oct 22, 2026 16:02",starred:false}
+    }
     function test_preformatted_backend_labels_are_localized_in_real_widgets() {
       waitForRendering(reader)
       compare(findChild(row, "message-time").text, Mail.displayTimeLabel("14:57"))

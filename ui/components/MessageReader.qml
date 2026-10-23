@@ -458,7 +458,8 @@ Item {
         color: root.dimColor
         font.family: root.panelFontFamily
         font.pixelSize: Style.font.caption
-        elide: Text.ElideRight
+        // Keep the complete date/day period visible beside long recipient lists.
+        wrapMode: Text.Wrap
         horizontalAlignment: root.headerAlignment
 
         TapHandler {
